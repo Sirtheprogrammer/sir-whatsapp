@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WhatsApp Web Enhancer",
-  "version": "1.0.0",
+  "version": "1.0.6",
   "description": "Enhance WhatsApp Web with anti-delete, invisible mode, AI integration, status features and more",
   "icons": {
     "16": "icons/icon16.png",
@@ -32,7 +32,7 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "css": ["styles.css"],
+      "css": ["content.css"],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
