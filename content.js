@@ -87,6 +87,7 @@
         if (features.messageSearch) enableAdvancedSearch();
         if (features.messageStats) enableMessageStats();
         if (features.quickReplies) enableQuickReplies();
+        initStatusFeatures(); // Add status features initialization
     }
     
     // Handle feature toggles
@@ -235,27 +236,51 @@
         });
     }
     
-    // Function to get response from Gemini (you'll need to implement the API call)
+    // Function to get response from Gemini
     async function getAIResponse(prompt) {
-        // This is a placeholder - in a real extension, you would:
-        // 1. Call your backend service that interfaces with Gemini API
-        // 2. Or call Gemini API directly with proper API key management
-        
-        // For demo purposes, we'll return a canned response
-        return "I'm a simulated AI response. In a real implementation, this would come from Gemini API!";
-        
-        // Example of how the actual implementation might look:
-        /*
-        const response = await fetch('https://your-backend-service.com/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
-        });
-        
-        if (!response.ok) throw new Error('API request failed');
-        const data = await response.json();
-        return data.message;
-        */
+        try {
+            // Get API key and model from storage
+            const { geminiApiKey, aiModel } = await new Promise((resolve) => {
+                chrome.storage.sync.get(['geminiApiKey', 'aiModel'], resolve);
+            });
+
+            if (!geminiApiKey) {
+                throw new Error('API key not configured. Please add your Gemini API key in settings.');
+            }
+
+            // Gemini API endpoint
+            const endpoint = `https://generativelanguage.googleapis.com/v1/models/${aiModel || 'gemini-pro'}:generateContent`;
+            
+            const response = await fetch(`${endpoint}?key=${geminiApiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get AI response');
+            }
+
+            const data = await response.json();
+            
+            if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                throw new Error('Invalid response format from AI');
+            }
+
+            return data.candidates[0].content.parts[0].text;
+        } catch (error) {
+            console.error('AI Integration error:', error);
+            showNotification(error.message);
+            return null;
+        }
     }
     
     // Auto status update feature
@@ -492,6 +517,8 @@
             z-index: 2000;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
         `;
         
         // Add header and close button
@@ -501,7 +528,34 @@
                 <button id="close-settings-popup" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
             </div>
             
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 20px;">
+                <h3>API Configuration</h3>
+                <div style="margin-bottom: 15px;">
+                    <label for="gemini-api-key">Gemini API Key:</label>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <input type="password" id="gemini-api-key" style="flex: 1; padding: 8px;" placeholder="Enter your Gemini API key">
+                        <button id="toggle-api-key" style="background: none; border: 1px solid #ccc; padding: 0 10px; cursor: pointer;">👁️</button>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        Required for AI integration features
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>
+                        <input type="checkbox" id="ai-auto-suggest" ${config.aiAutoSuggest ? 'checked' : ''}>
+                        Enable AI auto-suggestions
+                    </label>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="ai-model">AI Model:</label>
+                    <select id="ai-model" style="width: 100%; padding: 8px; margin-top: 5px;">
+                        <option value="gemini-pro">Gemini Pro</option>
+                        <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
                 <h3>Auto Status Settings</h3>
                 <div>
                     <label>Update Interval (hours):</label>
@@ -514,21 +568,31 @@
                 </div>
             </div>
             
-            <div style="margin-bottom: 15px;">
-                <h3>AI Integration</h3>
-                <div>
-                    <label>
-                        <input type="checkbox" id="ai-auto-suggest" ${config.aiAutoSuggest ? 'checked' : ''}>
-                        Enable auto-suggestions
-                    </label>
-                </div>
-            </div>
-            
-            <button id="save-settings" style="background: #128C7E; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px;">Save Settings</button>
+            <button id="save-settings" style="background: #128C7E; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%;">Save Settings</button>
         `;
         
         // Add the popup to the document
         document.body.appendChild(popup);
+        
+        // Add toggle API key visibility functionality
+        const apiKeyInput = document.getElementById('gemini-api-key');
+        const toggleButton = document.getElementById('toggle-api-key');
+        
+        // Load saved API key
+        chrome.storage.sync.get(['geminiApiKey', 'aiModel'], (result) => {
+            if (result.geminiApiKey) {
+                apiKeyInput.value = result.geminiApiKey;
+            }
+            if (result.aiModel) {
+                document.getElementById('ai-model').value = result.aiModel;
+            }
+        });
+        
+        toggleButton.addEventListener('click', () => {
+            const type = apiKeyInput.type;
+            apiKeyInput.type = type === 'password' ? 'text' : 'password';
+            toggleButton.textContent = type === 'password' ? '👁️‍🗨️' : '👁️';
+        });
         
         // Add close button functionality
         document.getElementById('close-settings-popup').addEventListener('click', () => {
@@ -537,16 +601,37 @@
         
         // Add save button functionality
         document.getElementById('save-settings').addEventListener('click', () => {
-            // Update config with new values
-            config.autoStatus.updateInterval = parseInt(document.getElementById('status-interval').value, 10);
-            config.autoStatus.statusMessages = document.getElementById('status-messages').value.split('\n').filter(s => s.trim());
-            config.aiAutoSuggest = document.getElementById('ai-auto-suggest').checked;
+            // Get values from form
+            const apiKey = document.getElementById('gemini-api-key').value;
+            const aiModel = document.getElementById('ai-model').value;
+            const aiAutoSuggest = document.getElementById('ai-auto-suggest').checked;
+            const statusInterval = parseInt(document.getElementById('status-interval').value, 10);
+            const statusMessages = document.getElementById('status-messages').value.split('\n').filter(s => s.trim());
             
-            // Save config (in a real extension, you would persist this)
+            // Update config
+            config.aiAutoSuggest = aiAutoSuggest;
+            config.autoStatus.updateInterval = statusInterval;
+            config.autoStatus.statusMessages = statusMessages;
             
-            // Close the popup
-            document.body.removeChild(popup);
-            showNotification('Settings saved!');
+            // Save to chrome.storage
+            chrome.storage.sync.set({
+                geminiApiKey: apiKey,
+                aiModel: aiModel,
+                aiAutoSuggest: aiAutoSuggest,
+                autoStatus: {
+                    updateInterval: statusInterval,
+                    statusMessages: statusMessages
+                }
+            }, () => {
+                // Close the popup
+                document.body.removeChild(popup);
+                showNotification('Settings saved successfully!');
+                
+                // Reinitialize AI features if API key is present
+                if (apiKey && config.aiIntegration) {
+                    initAIIntegration();
+                }
+            });
         });
     }
     
@@ -597,6 +682,153 @@
         };
         
         checkElement();
+    }
+    
+    // Initialize status features
+    function initStatusFeatures() {
+        // Wait for status container to be available
+        waitForElement('div[data-animate-status-viewer="true"]', (statusContainer) => {
+            // Add download button and reaction emojis to each status
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(() => {
+                    addStatusControls();
+                });
+            });
+
+            observer.observe(statusContainer, {
+                childList: true,
+                subtree: true
+            });
+
+            // Initial addition of controls
+            addStatusControls();
+        });
+    }
+
+    // Add status controls (download button and reactions)
+    function addStatusControls() {
+        // Find all status items that don't have our controls
+        const statusItems = document.querySelectorAll('div[data-animate-status-viewer="true"] div[data-testid="status-container"]');
+        
+        statusItems.forEach(statusItem => {
+            if (!statusItem.querySelector('.status-controls')) {
+                // Create controls container
+                const controlsContainer = document.createElement('div');
+                controlsContainer.className = 'status-controls';
+                
+                // Add download button
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'status-download-btn';
+                downloadBtn.innerHTML = '⬇️';
+                downloadBtn.title = 'Download Status';
+                downloadBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    downloadStatus(statusItem);
+                };
+                
+                // Add reaction emojis
+                const reactions = ['❤️', '😍', '😮', '😂', '😢', '🙏'];
+                const reactionContainer = document.createElement('div');
+                reactionContainer.className = 'status-reactions';
+                
+                reactions.forEach(emoji => {
+                    const reactionBtn = document.createElement('button');
+                    reactionBtn.className = 'status-reaction-btn';
+                    reactionBtn.innerHTML = emoji;
+                    reactionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        reactToStatus(statusItem, emoji);
+                    };
+                    reactionContainer.appendChild(reactionBtn);
+                });
+                
+                // Add controls to status
+                controlsContainer.appendChild(downloadBtn);
+                controlsContainer.appendChild(reactionContainer);
+                statusItem.appendChild(controlsContainer);
+            }
+        });
+    }
+
+    // Download status media
+    async function downloadStatus(statusItem) {
+        try {
+            // Find media element (image or video)
+            const mediaElement = statusItem.querySelector('img') || statusItem.querySelector('video');
+            if (!mediaElement) {
+                showNotification('No media found in status');
+                return;
+            }
+
+            // Get media URL
+            const mediaUrl = mediaElement.src;
+            if (!mediaUrl) {
+                showNotification('Media URL not found');
+                return;
+            }
+
+            // Create download link
+            const a = document.createElement('a');
+            
+            if (mediaElement.tagName === 'VIDEO') {
+                // For videos, fetch the blob
+                const response = await fetch(mediaUrl);
+                const blob = await response.blob();
+                a.href = URL.createObjectURL(blob);
+                a.download = `whatsapp-status-${Date.now()}.mp4`;
+            } else {
+                // For images, use direct URL
+                a.href = mediaUrl;
+                a.download = `whatsapp-status-${Date.now()}.jpg`;
+            }
+
+            // Trigger download
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            showNotification('Status downloaded successfully!');
+        } catch (error) {
+            console.error('Error downloading status:', error);
+            showNotification('Failed to download status');
+        }
+    }
+
+    // React to status with emoji
+    function reactToStatus(statusItem, emoji) {
+        // Find status ID or unique identifier
+        const statusId = statusItem.getAttribute('data-id') || Date.now().toString();
+        
+        // Save reaction in storage
+        chrome.storage.local.get('statusReactions', ({ statusReactions = {} }) => {
+            statusReactions[statusId] = emoji;
+            chrome.storage.local.set({ statusReactions }, () => {
+                // Show reaction animation
+                showReactionAnimation(statusItem, emoji);
+                // Send reaction to background script for potential sync
+                chrome.runtime.sendMessage({
+                    type: 'STATUS_REACTION',
+                    statusId,
+                    emoji
+                });
+            });
+        });
+    }
+
+    // Show reaction animation
+    function showReactionAnimation(statusItem, emoji) {
+        const animation = document.createElement('div');
+        animation.className = 'status-reaction-animation';
+        animation.textContent = emoji;
+        
+        statusItem.appendChild(animation);
+        
+        // Remove animation after it completes
+        setTimeout(() => {
+            if (statusItem.contains(animation)) {
+                statusItem.removeChild(animation);
+            }
+        }, 1000);
     }
     
     // Initialize the extension when WhatsApp Web is fully loaded
