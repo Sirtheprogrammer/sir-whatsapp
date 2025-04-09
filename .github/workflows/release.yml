@@ -5,16 +5,20 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
           
       - name: Install system dependencies
         run: |
@@ -35,8 +39,8 @@ jobs:
           zip -r sirtech-whatsapp.zip manifest.json popup.html popup.js background.js content.js icons/
           
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          files: sirtech-whatsapp.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          artifacts: "sirtech-whatsapp.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true 
