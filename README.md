@@ -65,4 +65,4 @@ npm run build
 MIT License
 
 ## Support
-For support, email support@sirtech.com or create an issue in the GitHub repository. 
+For support, email support@sirtech.com or create an issue in the GitHub repository. # sir-whatsapp
