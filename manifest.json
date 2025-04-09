@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SirTech WhatsApp",
-  "version": "1.0",
+  "version": "1.0.3",
   "description": "Enhance WhatsApp Web with features like anti-delete, invisible mode, AI integration and more",
   "icons": {
     "16": "icons/icon16.png",
@@ -19,8 +19,8 @@
   "permissions": [
     "storage",
     "webRequest",
-    "tabs",
-    "scripting"
+    "alarms",
+    "tabs"
   ],
   "host_permissions": [
     "https://web.whatsapp.com/*"
@@ -29,6 +29,7 @@
     {
       "matches": ["https://web.whatsapp.com/*"],
       "js": ["content.js"],
+      "css": ["styles.css"],
       "run_at": "document_idle"
     }
   ],

@@ -33,6 +33,34 @@
     // Store for deleted messages
     const deletedMessages = {};
     
+    // Feature states
+    let features = {
+        antiDelete: false,
+        invisibleMode: false,
+        aiAssistant: false,
+        messageScheduler: false,
+        autoReply: false,
+        messageFilter: false,
+        chatBackup: false,
+        messageSearch: false,
+        messageStats: false,
+        quickReplies: false
+    };
+    
+    // Load saved states
+    chrome.storage.sync.get(features, (result) => {
+        features = result;
+        initializeFeatures();
+    });
+    
+    // Listen for feature toggles from popup
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === 'TOGGLE_FEATURE') {
+            features[message.feature] = message.enabled;
+            handleFeatureToggle(message.feature, message.enabled);
+        }
+    });
+    
     // Main initialization function
     function initExtension() {
         console.log("WhatsApp Web Extension initialized");
@@ -45,6 +73,33 @@
         
         // Add UI controls
         addControlPanel();
+    }
+    
+    // Initialize features
+    function initializeFeatures() {
+        if (features.antiDelete) enableAntiDelete();
+        if (features.invisibleMode) enableInvisibleMode();
+        if (features.aiAssistant) enableAIAssistant();
+        if (features.messageScheduler) enableMessageScheduler();
+        if (features.autoReply) enableAutoReply();
+        if (features.messageFilter) enableMessageFilter();
+        if (features.chatBackup) enableChatBackup();
+        if (features.messageSearch) enableAdvancedSearch();
+        if (features.messageStats) enableMessageStats();
+        if (features.quickReplies) enableQuickReplies();
+    }
+    
+    // Handle feature toggles
+    function handleFeatureToggle(feature, enabled) {
+        switch (feature) {
+            case 'antiDelete':
+                enabled ? enableAntiDelete() : disableAntiDelete();
+                break;
+            case 'invisibleMode':
+                enabled ? enableInvisibleMode() : disableInvisibleMode();
+                break;
+            // Add other features...
+        }
     }
     
     // Anti-delete feature

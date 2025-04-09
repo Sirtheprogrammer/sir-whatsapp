@@ -117,6 +117,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
       });
       return true; // Required for async response
+
+    case 'SCHEDULE_MESSAGE':
+      scheduledMessages.push(message.data);
+      chrome.storage.local.set({ scheduledMessages });
+      sendResponse({ success: true });
+      return true;
+
+    case 'NEW_MESSAGE':
+      if (autoReplies.enabled) {
+        const reply = findMatchingAutoReply(message.text);
+        if (reply) {
+          chrome.tabs.sendMessage(sender.tab.id, {
+            type: 'SEND_AUTO_REPLY',
+            reply: reply
+          });
+        }
+      }
+      return true;
   }
 });
 
@@ -134,3 +152,69 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ["https://web.whatsapp.com/*"] }
 );
 */
+
+// Handle scheduled messages
+let scheduledMessages = [];
+
+// Load scheduled messages from storage
+chrome.storage.local.get(['scheduledMessages'], (result) => {
+    if (result.scheduledMessages) {
+        scheduledMessages = result.scheduledMessages;
+        checkScheduledMessages();
+    }
+});
+
+// Check for messages to send every minute
+setInterval(checkScheduledMessages, 60000);
+
+function checkScheduledMessages() {
+    const now = new Date().getTime();
+    const messagesToSend = scheduledMessages.filter(msg => msg.scheduledTime <= now);
+    
+    messagesToSend.forEach(msg => {
+        // Send message to content script
+        chrome.tabs.query({ url: 'https://web.whatsapp.com/*' }, (tabs) => {
+            if (tabs.length > 0) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    type: 'SEND_SCHEDULED_MESSAGE',
+                    message: msg
+                });
+            }
+        });
+    });
+
+    // Remove sent messages from schedule
+    scheduledMessages = scheduledMessages.filter(msg => msg.scheduledTime > now);
+    chrome.storage.local.set({ scheduledMessages });
+}
+
+// Handle auto-replies
+let autoReplies = {};
+
+chrome.storage.sync.get(['autoReplies'], (result) => {
+    if (result.autoReplies) {
+        autoReplies = result.autoReplies;
+    }
+});
+
+function findMatchingAutoReply(text) {
+    for (const rule of autoReplies.rules) {
+        if (text.toLowerCase().includes(rule.trigger.toLowerCase())) {
+            return rule.response;
+        }
+    }
+    return null;
+}
+
+// Handle message backup
+chrome.alarms.create('backup', { periodInMinutes: 60 });
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'backup') {
+        chrome.tabs.query({ url: 'https://web.whatsapp.com/*' }, (tabs) => {
+            if (tabs.length > 0) {
+                chrome.tabs.sendMessage(tabs[0].id, { type: 'BACKUP_CHATS' });
+            }
+        });
+    }
+});

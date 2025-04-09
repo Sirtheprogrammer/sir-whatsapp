@@ -1,0 +1,144 @@
+/* Custom styles for WhatsApp Web modifications */
+
+/* Message scheduler button */
+.scheduler-btn {
+    position: absolute;
+    right: 60px;
+    bottom: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.scheduler-btn:hover {
+    opacity: 1;
+}
+
+/* Quick replies button */
+.quick-replies-btn {
+    position: absolute;
+    right: 100px;
+    bottom: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.quick-replies-btn:hover {
+    opacity: 1;
+}
+
+/* Dialog styles */
+.st-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 10000;
+}
+
+.st-dialog h3 {
+    margin: 0 0 15px 0;
+    color: #128C7E;
+}
+
+.st-dialog input,
+.st-dialog textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.st-dialog button {
+    background: #128C7E;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.st-dialog button:hover {
+    background: #075E54;
+}
+
+/* Deleted message styles */
+.deleted-message {
+    position: relative;
+    padding-right: 24px;
+}
+
+.deleted-message::after {
+    content: '🔄';
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+/* Auto-reply indicator */
+.auto-reply-active {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #128C7E;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    z-index: 1000;
+}
+
+/* Message filter styles */
+.filtered-message {
+    background-color: rgba(18, 140, 126, 0.1);
+}
+
+/* Statistics panel */
+.stats-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 300px;
+}
+
+.stats-panel h4 {
+    margin: 0 0 10px 0;
+    color: #128C7E;
+}
+
+.stats-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+/* Invisible mode styles */
+.invisible-mode-active [data-icon="status-v3"],
+.invisible-mode-active [data-icon="status-ptt"],
+.invisible-mode-active [data-icon="status-dblcheck"] {
+    display: none !important;
+} 
