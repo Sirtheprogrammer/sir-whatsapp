@@ -1,0 +1,12 @@
+{
+  "name": "sirtech-whatsapp",
+  "version": "1.0.0",
+  "description": "WhatsApp Web extension with enhanced features",
+  "main": "generate_icons.js",
+  "scripts": {
+    "generate-icons": "node generate_icons.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
+  }
+} 

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SirTech WhatsApp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            width: 400px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .feature-card {
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .feature-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .nav-tabs {
+            margin-bottom: 15px;
+        }
+        .tab-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold">SirTech WhatsApp</h4>
+            <p class="text-muted">Enhance your WhatsApp Web experience</p>
+        </div>
+
+        <ul class="nav nav-tabs" id="featureTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">
+                    <i class="bi bi-star"></i> Basic
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced" type="button" role="tab">
+                    <i class="bi bi-gear"></i> Advanced
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="featureTabsContent">
+            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="card feature-card" id="antiDelete">
+                            <div class="card-body">
+                                <i class="bi bi-shield-check feature-icon text-primary"></i>
+                                <span class="card-title">Anti-Delete Messages</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="antiDeleteSwitch">
+                                </div>
+                                <div class="feature-description">Prevent others from deleting messages you've received</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="invisibleMode">
+                            <div class="card-body">
+                                <i class="bi bi-eye-slash feature-icon text-success"></i>
+                                <span class="card-title">Invisible Mode</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="invisibleSwitch">
+                                </div>
+                                <div class="feature-description">Browse without showing your online status</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="aiAssistant">
+                            <div class="card-body">
+                                <i class="bi bi-robot feature-icon text-info"></i>
+                                <span class="card-title">AI Assistant</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="aiSwitch">
+                                </div>
+                                <div class="feature-description">Get AI-powered assistance for your conversations</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="messageScheduler">
+                            <div class="card-body">
+                                <i class="bi bi-clock feature-icon text-warning"></i>
+                                <span class="card-title">Message Scheduler</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="schedulerSwitch">
+                                </div>
+                                <div class="feature-description">Schedule messages to be sent at specific times</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="advanced" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="card feature-card" id="autoReply">
+                            <div class="card-body">
+                                <i class="bi bi-reply-all feature-icon text-danger"></i>
+                                <span class="card-title">Auto Reply</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="autoReplySwitch">
+                                </div>
+                                <div class="feature-description">Set automatic replies when you're away</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="messageFilter">
+                            <div class="card-body">
+                                <i class="bi bi-funnel feature-icon text-secondary"></i>
+                                <span class="card-title">Message Filter</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="filterSwitch">
+                                </div>
+                                <div class="feature-description">Filter and organize messages by keywords</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="chatBackup">
+                            <div class="card-body">
+                                <i class="bi bi-cloud-upload feature-icon text-primary"></i>
+                                <span class="card-title">Chat Backup</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="backupSwitch">
+                                </div>
+                                <div class="feature-description">Automatically backup your chats</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="messageSearch">
+                            <div class="card-body">
+                                <i class="bi bi-search feature-icon text-info"></i>
+                                <span class="card-title">Advanced Search</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="searchSwitch">
+                                </div>
+                                <div class="feature-description">Enhanced search across all chats</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="messageStats">
+                            <div class="card-body">
+                                <i class="bi bi-graph-up feature-icon text-success"></i>
+                                <span class="card-title">Message Statistics</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="statsSwitch">
+                                </div>
+                                <div class="feature-description">Analyze your messaging patterns</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card feature-card" id="quickReplies">
+                            <div class="card-body">
+                                <i class="bi bi-lightning feature-icon text-warning"></i>
+                                <span class="card-title">Quick Replies</span>
+                                <div class="form-check form-switch float-end">
+                                    <input class="form-check-input" type="checkbox" id="quickRepliesSwitch">
+                                </div>
+                                <div class="feature-description">Create and use quick response templates</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <button class="btn btn-primary" id="settingsBtn">
+                <i class="bi bi-gear"></i> Settings
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html> 
