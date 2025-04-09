@@ -16,11 +16,19 @@ jobs:
         with:
           node-version: '16'
           
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev build-essential g++
+          
+      - name: Create icons directory
+        run: mkdir -p icons
+          
       - name: Install dependencies
         run: npm install
         
       - name: Generate icons
-        run: npm run generate-icons
+        run: node generate_icons.js
         
       - name: Create release package
         run: |

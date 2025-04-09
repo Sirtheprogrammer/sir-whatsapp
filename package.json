@@ -4,9 +4,22 @@
   "description": "WhatsApp Web extension with enhanced features",
   "main": "generate_icons.js",
   "scripts": {
-    "generate-icons": "node generate_icons.js"
+    "generate-icons": "node generate_icons.js",
+    "build": "node generate_icons.js && zip -r sirtech-whatsapp.zip manifest.json popup.html popup.js background.js content.js icons/"
   },
   "dependencies": {
     "canvas": "^2.11.2"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sirtheprogrammer/sir-whatsapp.git"
+  },
+  "keywords": [
+    "whatsapp",
+    "extension",
+    "chrome"
+  ],
+  "author": "SirTech",
+  "license": "MIT"
 } 
